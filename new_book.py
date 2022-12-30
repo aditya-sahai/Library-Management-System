@@ -3,6 +3,8 @@ from PIL import ImageTk, Image
 from tkinter import messagebox
 from tkinter import filedialog
 
+from CRUDOperations import *
+
 mainheadingfont = ("Footlight MT Light", 20)
 
 
@@ -58,7 +60,10 @@ def submitnewbook():
     fbookauthor = book_author.get()
     fbookisbn = book_isbn.get()
     fbookgenre = book_genre.get()
-    response = messagebox.showinfo("Information", "Book entry was successfull") 
+    fbookgenre = fbookgenre.lower()
+    response = messagebox.showinfo("Information", "Book entry was successfull")
+
+    write_new_record(fbookgenre, fbookname, fbookisbn, fbookauthor)
 
     #clear the input fields
 
