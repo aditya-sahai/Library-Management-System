@@ -3,10 +3,12 @@ from PIL import ImageTk, Image
 from tkinter import messagebox
 from tkinter import filedialog
 
+from CRUDOperations import *
+
 mainheadingfont = ("Footlight MT Light", 20)
  
 def issuebook():
-    global issuebookname
+    global issuebookname, borrower_name, issuebookgenre
 
     # configuring new window
     issuemenu = Toplevel()
@@ -28,16 +30,17 @@ def issuebook():
     issuebookname.grid(row = 2, column = 1)
 
     nbfps2 = Label(issueframe, bg="black").grid(row = 3, column = 1)
-    label2 = Label(issueframe, text = "Enter Name Of Borrower:", bg = "black", fg = "white").grid(row = 4, column = 0)
-    borrower_name = Entry(issueframe, width = "25", bg = "black", fg = "white", borderwidth=1, insertbackground = "white")
-    borrower_name.grid(row = 4, column = 1)
+    label2 = Label(issueframe, text = "Enter Book Genre:", bg = "black", fg = "white").grid(row = 4, column = 0)
+    issuebookgenre = Entry(issueframe, width = "25", bg = "black", fg = "white", borderwidth=1, insertbackground = "white")
+    issuebookgenre.grid(row = 4, column = 1)
 
-    '''
+    
     nbfps4 = Label(issueframe, bg="black").grid(row = 5, column = 1)
-    label3 = Label(issueframe, text = "Enter Book ISBN:", bg = "black", fg = "white").grid(row = 6, column = 0)
-    book_isbn = Entry(issueframe, width = "25", bg = "black", fg = "white", borderwidth=1, insertbackground = "white")
-    book_isbn.grid(row = 6, column = 1)
-
+    label3 = Label(issueframe, text = "Enter Borrower Name:", bg = "black", fg = "white").grid(row = 6, column = 0)
+    borrower_name = Entry(issueframe, width = "25", bg = "black", fg = "white", borderwidth=1, insertbackground = "white")
+    borrower_name.grid(row = 6, column = 1)
+    
+    '''
     nbfps5 = Label(issueframe, bg="black").grid(row = 7, column = 1)
     label3 = Label(issueframe, text = "Enter Book Genre:", bg = "black", fg = "white").grid(row = 8, column = 0)
     book_genre = Entry(issueframe, width = "25", bg = "black", fg = "white", borderwidth=1, insertbackground = "white")
@@ -56,13 +59,31 @@ def issuebook():
 def issuethebook():
     global status
     # these variables return the data user has entered
-    fbookissue = issuebookname.get()
-    response = messagebox.showinfo("Information", "Book has been successfully issued!") 
+    fborrower_name = borrower_name.get()
+    fissuebookgenre = issuebookgenre.get()
+    fissuebookgenre = fissuebookgenre.lower()
+    fbookissuename = issuebookname.get()
 
-    """
-    change this part for the status of the book
-    """
-    status = "not-in-shelf"
+    # handling various cases of the book
+    record_found = get_book_record(fissuebookgenre, fbookissuename)
+
+    # for when the borrower name is not entered 
+    if not fborrower_name:
+        fborrower_name = ""
+
+
+    if record_found:
+        if edit_existing_record(fissuebookgenre, fbookissuename, fborrower_name):
+            response_success = messagebox.showinfo("Information", "Book has been successfully issued!")
+        else:
+            respose_failure = messagebox.showwarning("Information", "Book is issued by someone else. Try again later.")  # feature: show who issued it, etc
+    else:
+        reponse_doesntexist = messagebox.showerror("Information", "Book doesn't exist! Please enter a valid book and check your data.")  
+
+    # add feature for permission denied to edit file because it is open
 
     #clear the input fields
     issuebookname.delete(0, END)
+    borrower_name.delete(0, END)
+    issuebookgenre.delete(0, END)
+
