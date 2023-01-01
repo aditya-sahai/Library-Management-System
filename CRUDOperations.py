@@ -51,12 +51,12 @@ def get_book_record(genre, req_book_name):
         # checks if required book is found
         if name.lower() == req_book_name.lower():
             return {
-                "book-name": name,
-                "isbn": isbn,
-                "author": author,
-                "status": status,
-                "issued-by": issued_by,
-                "issued-on": issued_on,
+                "Book Name": name.title(),
+                "ISBN": isbn,
+                "Author": author.title(),
+                "Status": status,
+                "Issued By": issued_by,
+                "Issued On": issued_on,
             }
 
     return None

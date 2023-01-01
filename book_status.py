@@ -1,7 +1,9 @@
 from tkinter import *
-from PIL import ImageTk, Image
+# from PIL import ImageTk, Image
 from tkinter import messagebox
 from tkinter import filedialog
+
+from CRUDOperations import *
 
 mainheadingfont = ("Footlight MT Light", 20)
  
@@ -58,6 +60,24 @@ def checkbookstatus():
 
     fstatusbookname = statusbookname.get()
     fstatusbookgenre = statusbookgenre.get()
+
+    bookstatus = get_book_record(fstatusbookgenre, fstatusbookname)
+
+    line = ""
+    for data in bookstatus:
+        if data == "Status":
+            if bookstatus:
+                status = "In shelf"
+            else:
+                status = "Not in shelf"
+            line += f"Status - {status}\n"
+        else:
+            line += f"{data} - {bookstatus[data]}\n"
+
+    if bookstatus:
+        response = messagebox.showinfo("Information", line)
+    else:
+        response = messagebox.showerror("Error", "Book doesn't exist. Please enter a valid book name or check your data!")
 
     #clear the input fields
     statusbookgenre.delete(0, END)
