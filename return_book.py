@@ -3,10 +3,12 @@ from PIL import ImageTk, Image
 from tkinter import messagebox
 from tkinter import filedialog
 
+from CRUDOperations import *
+
 mainheadingfont = ("Footlight MT Light", 20)
  
 def returnbook():
-    global returnbookname
+    global returnbookname, returnbookgenre
 
     # configuring new window
     returnmenu = Toplevel()
@@ -27,12 +29,13 @@ def returnbook():
     returnbookname = Entry(returnframe, width = "25", bg = "black", fg = "white", borderwidth=1, insertbackground = "white")
     returnbookname.grid(row = 2, column = 1)
 
-    '''
+    
     nbfps2 = Label(returnframe, bg="black").grid(row = 3, column = 1)
-    label2 = Label(returnframe, text = "Enter Name Of Borrower:", bg = "black", fg = "white").grid(row = 4, column = 0)
-    borrower_name = Entry(returnframe, width = "25", bg = "black", fg = "white", borderwidth=1, insertbackground = "white")
-    borrower_name.grid(row = 4, column = 1)
+    label2 = Label(returnframe, text = "Enter Book Genre:", bg = "black", fg = "white").grid(row = 4, column = 0)
+    returnbookgenre = Entry(returnframe, width = "25", bg = "black", fg = "white", borderwidth=1, insertbackground = "white")
+    returnbookgenre.grid(row = 4, column = 1)
 
+    '''
     nbfps4 = Label(issueframe, bg="black").grid(row = 5, column = 1)
     label3 = Label(issueframe, text = "Enter Book ISBN:", bg = "black", fg = "white").grid(row = 6, column = 0)
     book_isbn = Entry(issueframe, width = "25", bg = "black", fg = "white", borderwidth=1, insertbackground = "white")
@@ -54,15 +57,21 @@ def returnbook():
 
 
 def returnthebook():
-    global status
-    # these variables return the data user has entered
-    fbookreturn = returnbookname.get()
-    response = messagebox.showinfo("Information", "Book has been successfully returned!") 
 
-    """
-    change this part for the status of the book
-    """
-    status = "in-shelf"
+    freturnbookname = returnbookname.get()
+    freturnbookgenre = returnbookgenre.get()
+
+    record_found = get_book_record(freturnbookgenre, freturnbookname)
+
+    if record_found:
+        if edit_existing_record(freturnbookgenre, freturnbookname):
+            response_success = messagebox.showinfo("Information", "Book has been successfully returned!")
+        else:
+            respose_failure = messagebox.showwarning("Information", "Book is issued by someone else. Try again later.")  # feature: show who issued it, etc
+    else:
+        reponse_doesntexist = messagebox.showerror("Information", "Book doesn't exist! Please enter a valid book and check your data.")  
+
     
     #clear the input fields
     returnbookname.delete(0, END)
+    returnbookgenre.delete(0, END)

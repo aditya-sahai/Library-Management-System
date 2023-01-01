@@ -6,7 +6,7 @@ from tkinter import filedialog
 mainheadingfont = ("Footlight MT Light", 20)
  
 def bookstatus():
-    global statusbookname
+    global statusbookname, statusbookgenre
 
     # configuring new window
     statusmenu = Toplevel()
@@ -25,14 +25,15 @@ def bookstatus():
     nbfps1 = Label(statusframe, bg="black").grid(row = 1, column = 1)
     label1 = Label(statusframe, text = "Enter Book Name:", bg = "black", fg = "white").grid(row = 2, column = 0)
     statusbookname = Entry(statusframe, width = "25", bg = "black", fg = "white", borderwidth=1, insertbackground = "white")
-    statusbookname.grid(row = 2, column = 2)
+    statusbookname.grid(row = 2, column =1)
+
+    
+    nbfps2 = Label(statusframe, bg="black").grid(row = 3, column = 1)
+    label2 = Label(statusframe, text = "Enter Book Genre:", bg = "black", fg = "white").grid(row = 4, column = 0)
+    statusbookgenre = Entry(statusframe, width = "25", bg = "black", fg = "white", borderwidth=1, insertbackground = "white")
+    statusbookgenre.grid(row = 4, column = 1)
 
     '''
-    nbfps2 = Label(returnframe, bg="black").grid(row = 3, column = 1)
-    label2 = Label(returnframe, text = "Enter Name Of Borrower:", bg = "black", fg = "white").grid(row = 4, column = 0)
-    borrower_name = Entry(returnframe, width = "25", bg = "black", fg = "white", borderwidth=1, insertbackground = "white")
-    borrower_name.grid(row = 4, column = 1)
-
     nbfps4 = Label(issueframe, bg="black").grid(row = 5, column = 1)
     label3 = Label(issueframe, text = "Enter Book ISBN:", bg = "black", fg = "white").grid(row = 6, column = 0)
     book_isbn = Entry(issueframe, width = "25", bg = "black", fg = "white", borderwidth=1, insertbackground = "white")
@@ -54,5 +55,10 @@ def bookstatus():
 
 
 def checkbookstatus():
+
+    fstatusbookname = statusbookname.get()
+    fstatusbookgenre = statusbookgenre.get()
+
     #clear the input fields
+    statusbookgenre.delete(0, END)
     statusbookname.delete(0, END)
