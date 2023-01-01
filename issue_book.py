@@ -2,6 +2,7 @@ from tkinter import *
 # from PIL import ImageTk, Image
 from tkinter import messagebox
 from tkinter import filedialog
+import random
 
 from CRUDOperations import *
 
@@ -9,6 +10,9 @@ mainheadingfont = ("Footlight MT Light", 20)
  
 def issuebook():
     global issuebookname, borrower_name, issuebookgenre
+
+    # list having all the genres for the genre dropdown menu 
+    genre_options = ["Fiction", "Fantasy", "Adventure", "Non-Fiction", "Educational"]
 
     # configuring new window
     issuemenu = Toplevel()
@@ -31,8 +35,14 @@ def issuebook():
 
     nbfps2 = Label(issueframe, bg="black").grid(row = 3, column = 1)
     label2 = Label(issueframe, text = "Enter Book Genre:", bg = "black", fg = "white").grid(row = 4, column = 0)
-    issuebookgenre = Entry(issueframe, width = "25", bg = "black", fg = "white", borderwidth=1, insertbackground = "white")
-    issuebookgenre.grid(row = 4, column = 1)
+    issuebookgenre = StringVar()
+    issuebookgenre.set(genre_options[random.randint(0,4)])
+    genredropdown = OptionMenu(issueframe, issuebookgenre, *genre_options)
+    genredropdown.config(width=19, bg="black", fg="white", activebackground="#1a1a1a", activeforeground="white", highlightthickness=0)
+    genredropdown.grid(row = 4, column = 1)
+
+    # issuebookgenre = Entry(issueframe, width = "25", bg = "black", fg = "white", borderwidth=1, insertbackground = "white")
+    # issuebookgenre.grid(row = 4, column = 1)
 
     
     nbfps4 = Label(issueframe, bg="black").grid(row = 5, column = 1)
@@ -55,27 +65,30 @@ def issuebook():
     # go back button
     goback_button = Button(issueframe, text="Back", bg = "black", fg = "white", command = issuemenu.destroy).grid(row = 11, column = 0)
 
-    # hover event binding
+    '''
+    Changing the color of the buttons is not working here for some reason
+    
     issue_button.bind("<Enter>", button_enterhover)
     issue_button.bind("<Leave>", button_leavehover)
     goback_button.bind("<Enter>", button_enterhover)
     goback_button.bind("<Leave>", button_leavehover)
+    '''
 
 def issuethebook():
-    global status
     # these variables return the data user has entered
     fborrower_name = borrower_name.get()
-    fissuebookgenre = issuebookgenre.get()
-    fissuebookgenre = fissuebookgenre.lower()
     fbookissuename = issuebookname.get()
 
+    # returning proper genres as chosen from the dropdown menu
+    fissuebookgenre = issuebookgenre.get()
+    fissuebookgenre = fissuebookgenre.lower()
+
     # handling various cases of the book
-    record_found = get_book_record(fissuebookgenre, fbookissuename)
 
     # for when the borrower name is not entered 
+    record_found = get_book_record(fissuebookgenre, fbookissuename)
     if not fborrower_name:
         fborrower_name = ""
-
 
     if record_found:
         if edit_existing_record(fissuebookgenre, fbookissuename, fborrower_name):
@@ -90,5 +103,3 @@ def issuethebook():
     #clear the input fields
     issuebookname.delete(0, END)
     borrower_name.delete(0, END)
-    issuebookgenre.delete(0, END)
-

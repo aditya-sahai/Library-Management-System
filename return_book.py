@@ -2,6 +2,7 @@ from tkinter import *
 # from PIL import ImageTk, Image
 from tkinter import messagebox
 from tkinter import filedialog
+import random
 
 from CRUDOperations import *
 
@@ -9,6 +10,9 @@ mainheadingfont = ("Footlight MT Light", 20)
  
 def returnbook():
     global returnbookname, returnbookgenre
+
+    # list having all the genres for the genre dropdown menu 
+    genre_options = ["Fiction", "Fantasy", "Adventure", "Non-Fiction", "Educational"]
 
     # configuring new window
     returnmenu = Toplevel()
@@ -32,8 +36,13 @@ def returnbook():
     
     nbfps2 = Label(returnframe, bg="black").grid(row = 3, column = 1)
     label2 = Label(returnframe, text = "Enter Book Genre:", bg = "black", fg = "white").grid(row = 4, column = 0)
-    returnbookgenre = Entry(returnframe, width = "25", bg = "black", fg = "white", borderwidth=1, insertbackground = "white")
-    returnbookgenre.grid(row = 4, column = 1)
+    returnbookgenre = StringVar()
+    returnbookgenre.set(genre_options[random.randint(0,4)])
+    genredropdown = OptionMenu(returnframe, returnbookgenre, *genre_options)
+    genredropdown.config(width=19, bg="black", fg="white", activebackground="#1a1a1a", activeforeground="white", highlightthickness=0)
+    genredropdown.grid(row = 4, column = 1)
+    # returnbookgenre = Entry(returnframe, width = "25", bg = "black", fg = "white", borderwidth=1, insertbackground = "white")
+    # returnbookgenre.grid(row = 4, column = 1)
 
     '''
     nbfps4 = Label(issueframe, bg="black").grid(row = 5, column = 1)
@@ -55,16 +64,20 @@ def returnbook():
     # go back button
     goback_button = Button(returnframe, text="Back", bg = "black", fg = "white", command = returnmenu.destroy).grid(row = 11, column = 0)
 
-    # buttons hover event binding
+    '''
+    Changing the color of the buttons is not working here for some reason
+
     return_button.bind("<Enter>", button_enterhover)
     return_button.bind("<Leave>", button_leavehover)
     goback_button.bind("<Enter>", button_enterhover)
     goback_button.bind("<Leave>", button_leavehover)
+    '''
 
 def returnthebook():
 
     freturnbookname = returnbookname.get()
     freturnbookgenre = returnbookgenre.get()
+    freturnbookgenre = freturnbookgenre.lower()
 
     record_found = get_book_record(freturnbookgenre, freturnbookname)
 
@@ -79,4 +92,3 @@ def returnthebook():
     
     #clear the input fields
     returnbookname.delete(0, END)
-    returnbookgenre.delete(0, END)

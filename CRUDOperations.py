@@ -18,10 +18,10 @@ def button_leavehover(e):
 BOOKS_DATA_DIR = os.path.join(os.getcwd(), "books")
 
 genre_shelf = {
-    "sci-fi": 1,
+    "fiction": 1,
     "fantasy": 2,
-    "fiction": 3,
-    "drama": 4,
+    "adventure": 3,
+    "non-fiction": 4,
     "educational": 5,
 }
 
