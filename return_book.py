@@ -50,11 +50,16 @@ def returnbook():
     # return button code
     nbfps6 = Label(returnframe, bg="black").grid(row = 9, column = 1)
     nbfps7 = Label(returnframe, bg="black").grid(row = 10, column = 1)
-    issue_button = Button(returnframe, text="Return Book", bg = "black", fg = "white", command = returnthebook).grid(row = 11, column = 2)
+    return_button = Button(returnframe, text="Return Book", bg = "black", fg = "white", command = returnthebook).grid(row = 11, column = 2)
 
     # go back button
     goback_button = Button(returnframe, text="Back", bg = "black", fg = "white", command = returnmenu.destroy).grid(row = 11, column = 0)
 
+    # buttons hover event binding
+    return_button.bind("<Enter>", button_enterhover)
+    return_button.bind("<Leave>", button_leavehover)
+    goback_button.bind("<Enter>", button_enterhover)
+    goback_button.bind("<Leave>", button_leavehover)
 
 def returnthebook():
 

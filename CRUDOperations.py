@@ -2,6 +2,19 @@ import os
 import datetime
 
 
+'''
+Buttons hover code
+Placing this here because this file is imported almost everywhere,
+So its convenient to call this function from here
+'''
+def button_enterhover(e):
+    e.widget['background'] = "#1a1a1a"
+
+def button_leavehover(e):
+    e.widget['background'] = 'black'
+
+
+
 BOOKS_DATA_DIR = os.path.join(os.getcwd(), "books")
 
 genre_shelf = {

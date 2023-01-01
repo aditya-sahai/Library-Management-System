@@ -6,6 +6,7 @@ from new_book import *
 from issue_book import *
 from return_book import *
 from book_status import *
+from CRUDOperations import button_enterhover, button_leavehover
 
 '''
 from new_book import *
@@ -57,5 +58,14 @@ mainmenuplaceholder4.grid(row=7, column=1)
 checkbookstatusmain = Button(mainscreenframe, text="[4] Check Book Status", bg = "black", fg = "white", command = bookstatus)
 checkbookstatusmain.grid(row = 8, column = 1)
 
+# Buttons hover event binding
+enternewbook.bind("<Enter>", button_enterhover)
+enternewbook.bind("<Leave>", button_leavehover)
+issuebookmain.bind("<Enter>", button_enterhover)
+issuebookmain.bind("<Leave>", button_leavehover)
+returnbookmain.bind("<Enter>", button_enterhover)
+returnbookmain.bind("<Leave>", button_leavehover)
+checkbookstatusmain.bind("<Enter>", button_enterhover)
+checkbookstatusmain.bind("<Leave>", button_leavehover)
 
 root.mainloop()

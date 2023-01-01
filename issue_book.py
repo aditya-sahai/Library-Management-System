@@ -55,6 +55,11 @@ def issuebook():
     # go back button
     goback_button = Button(issueframe, text="Back", bg = "black", fg = "white", command = issuemenu.destroy).grid(row = 11, column = 0)
 
+    # hover event binding
+    issue_button.bind("<Enter>", button_enterhover)
+    issue_button.bind("<Leave>", button_leavehover)
+    goback_button.bind("<Enter>", button_enterhover)
+    goback_button.bind("<Leave>", button_leavehover)
 
 def issuethebook():
     global status

@@ -55,6 +55,13 @@ def bookstatus():
     # go back button
     goback_button = Button(statusframe, text="Back", bg = "black", fg = "white", command = statusmenu.destroy).grid(row = 11, column = 0)
 
+    '''
+    # hover event binding
+    status_button.bind("<Enter>", button_enterhover)
+    status_button.bind("<Leave>", button_leavehover)
+    goback_button.bind("<Enter>", button_enterhover)
+    goback_button.bind("<Leave>", button_leavehover)
+    '''
 
 def checkbookstatus():
 

@@ -52,8 +52,13 @@ def opennewbookmenu():
     # go back button
     back_button = Button(newbookframe, text="Back", bg = "black", fg = "white", command = newbookmenu.destroy).grid(row = 11, column = 0)
 
-# what to do after user has submitted data
+    # buttons hover binding
+    submit_button.bind("<Enter>", button_enterhover)
+    submit_button.bind("<Leave>", button_leavehover)
+    back_button.bind("<Enter>", button_enterhover)
+    back_button.bind("<Leave>", button_leavehover)
 
+# what to do after user has submitted data
 def submitnewbook():
     # these variables return the data user has entered
     fbookname = book_name.get()
