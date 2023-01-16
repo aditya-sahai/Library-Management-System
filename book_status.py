@@ -85,7 +85,7 @@ def checkbookstatus():
     line = ""
     for data in bookstatus:
         if data == "Status":
-            if bookstatus:
+            if bookstatus["Status"]:
                 status = "In shelf"
             else:
                 status = "Not in shelf"
