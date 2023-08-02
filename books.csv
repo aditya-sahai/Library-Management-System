@@ -1,2 +1,2 @@
-Book Name,Genre,ISBN,Author,Status
-Harry Potter,Fantasy,12345,JK. Rowling,in-shelf
+Book Name,ISBN,Genre,Author,Status
+Harry Potter,12345,Fantasy,JK. Rowling,in-shelf
