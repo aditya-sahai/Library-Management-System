@@ -1,2 +1,1 @@
-User Name,Phone,Book Name,ISBN,Duration,Issue Date,Return Date
-Aditya Sahai,8527728994,Harry Potter,12345,7,3/8/2023,3/8/2023
+User Name,Phone,Book Name,ISBN,Issue Date,Expected Return Date,Actual Return Date

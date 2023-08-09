@@ -1,213 +1,329 @@
 import os
 import csv
-from datetime import datetime, date
+from datetime import date, timedelta
 
 
-BOOKS_FILE = os.path.join(os.getcwd(), "books.csv")
-USERS_FILE = os.path.join(os.getcwd(), "users.csv")
-BOOK_STATUS_FILE = os.path.join(os.getcwd(), "book-status.csv")
-LOG_FILE = os.path.join(os.getcwd(), "log.csv")
+BASE_DIR = os.getcwd()
+BOOKS_FILE = os.path.join(BASE_DIR, "books.csv")
+USERS_FILE = os.path.join(BASE_DIR, "users.csv")
+BOOK_STATUS_FILE = os.path.join(BASE_DIR, "book-status.csv")
+LOG_FILE = os.path.join(BASE_DIR, "log.csv")
 
 
-# READING/WRITING DATA RELATED FUNCTIONS -----------------------------------------------------------
 def reset_data_files(reset_books=True, reset_users=True, reset_books_status=True, reset_log=True):
     """
-    Removes all the data from the books and users file if reset_books and reset_users respectively
-    are True
+    Removes all the data from specified files
     """
     # NOT USED IN PROGRAM, MADE ONLY FOR CONVENIENCE WHILE DEVELOPING
     if reset_books:
         with open(BOOKS_FILE, "w", newline="") as books_f:
-            books_f.write("Book Name,Genre,ISBN,Author,Status")
+            books_f.write("Book Name,Genre,ISBN,Author,Status\n")
     if reset_users:
         with open(USERS_FILE, "w", newline="") as users_f:
-            users_f.write("First Name,Last Name,Phone,Membership Date,Duration")
+            users_f.write("First Name,Last Name,Phone,Registration Date,Expiry Date\n")
     if reset_books_status:
         with open(BOOK_STATUS_FILE, "w", newline="") as book_status_f:
-            book_status_f.write("ISBN,Phone,Duration,Issue Date")
+            book_status_f.write("ISBN,Phone,Issue Date,Expected Return Date\n")
     if reset_log:
         with open(LOG_FILE, "w", newline="") as log_f:
-            log_f.write("User Name,Phone,Book Name,ISBN,Duration,Issue Date,Return Date\n")
+            log_f.write("User Name,Phone,Book Name,ISBN,Issue Date,Expected Return Date,Actual Return Date\n")
 
-def get_data():
+def add_new_book(name, genre, isbn, author):
     """
-    Returns two 2D lists of users and books respectively
+    Returns "name" if book with given name already exists, "isbn" if book with given isbn already
+    exists and returns "done" if new book data given.
     """
-    # Must be called at the start of the program, program won't work otherwise
+    # isbn should be a string without whitespace at the ends
 
-    # csv.reader returns a csv.Reader object which is converted to a list so that
-    # all list operations can be used to manipulate data
-    with open(BOOKS_FILE, "r") as books_f:
+    # loading books data
+    with open(BOOKS_FILE, "r", newline="") as books_f:
         books = list(csv.reader(books_f))
+
+    # checking for overlapping data
+    for book in books:
+        if name.lower() == book[0].lower():
+            return "name"
+        elif isbn == book[2]:
+            return "isbn"
+
+    # saving the data if isbn and name both are unique
+    row = [name, genre, isbn, author, "in-shelf"]
+    with open(BOOKS_FILE, "a", newline="") as books_f:
+        writer = csv.writer(books_f)
+        writer.writerow(row)
+
+    return "done"
+
+def add_new_user(first_name, last_name, phone, duration=30):
+    """
+    Returns "phone" if user with given phone number already exists and returns "done" if phone
+    number is unique.
+    """
+    # phone number should be a string without whitespace at the ends
+
+    # loading users data
+    with open(USERS_FILE, "r", newline="") as users_f:
+        users = list(csv.reader(users_f))
+
+    # checking for overlapping data
+    for user in users:
+        if phone == user[2]:
+            return "phone"
+
+    registration_date = date.today()
+    expiry_date = registration_date + timedelta(days=duration)
+
+    # changing dates to dd/mm/yy format
+    registration_date = registration_date.strftime("%d/%m/%Y")
+    expiry_date = expiry_date.strftime("%d/%m/%Y")
+
+    # saving the data if isbn and name both are unique
+    row = [first_name, last_name, phone, registration_date, expiry_date]
+    with open(USERS_FILE, "a", newline="") as users_f:
+        writer = csv.writer(users_f)
+        writer.writerow(row)
+
+    return "done"
+
+def issue_book(isbn, phone, duration=7):
+    """
+    Checks if given phone number and book exist, if book is "in-shelf" and valid phone number then
+    issues the book by adding new record to book-status.csv and changing status to "not-in-shelf".
+    Returns "phone" if user with given phone number not found, "isbn" if book with given isbn not
+    exists, "expired" if user membership expired, "not-in-shelf" if phone number and isbn are valid
+    but book is already issued by someone and "done" if issuing book completed successfully.
+    """
+    # phone number and isbn should be strings without whitespace at the ends
+
+    # loading users data and books data
+    with open(USERS_FILE, "r", newline="") as users_f:
+        users = list(csv.reader(users_f))
+
+    with open(BOOKS_FILE, "r", newline="") as books_f:
+        books = list(csv.reader(books_f))
+
+    # checking if user with given phone number exists
+    user_found = False
+    for user in users:
+        if phone == user[2]:
+            user_found = True
+            break
+
+    # checking if user membership has expired or not
+    d, m, y = user[4].split("/")
+    expiry_date = date(int(y), int(m), int(d))
+    if expiry_date < date.today(): # true if expired
+        return "expired"
+
+    if not user_found:
+        return "phone"
+
+    # checking if book with given isbn exists, if it exists then checking if book is "in-shelf"
+    book_found = False
+    for book in books:
+        if isbn == book[2]:
+            book_found = True
+            if book[4] == "not-in-shelf":
+                return "not-in-shelf"
+            else:
+                book[4] = "not-in-shelf" # change status to "not-in-shelf" if book is "in-shelf"
+
+    if not book_found:
+        return "isbn"
+
+    # writing record in book-status.csv
+    issue_date = date.today()
+    expected_return_date = issue_date + timedelta(days=duration)
+
+    # changing dates to dd/mm/yy format
+    issue_date = issue_date.strftime("%d/%m/%Y")
+    expected_return_date = expected_return_date.strftime("%d/%m/%Y")
+
+    row = [isbn, phone, issue_date, expected_return_date]
+    with open(BOOK_STATUS_FILE, "a", newline="") as book_status_f:
+        writer = csv.writer(book_status_f)
+        writer.writerow(row)
+
+    # changing "in-shelf" to "not-in-shelf"
+    with open(BOOKS_FILE, "w", newline="") as books_f:
+        writer = csv.writer(books_f)
+        writer.writerows(books)
+
+    return "done"
+
+def renew_user(phone, duration=30):
+    """
+    Returns "phone" if user with given phone number not found and "done" if membership renewed
+    successfully.
+    """
+    # phone number should be a string without whitespace at the ends
+
+    # loading users data
+    with open(USERS_FILE, "r", newline="") as users_f:
+        users = list(csv.reader(users_f))
+
+    user_found = False
+    for user in users:
+        if phone == user[2]: # user found here
+            user_found = True
+            registration_date = date.today()
+            expiry_date = registration_date + timedelta(days=duration)
+
+            # changing dates to dd/mm/yy format and updating user
+            user[3] = registration_date.strftime("%d/%m/%Y")
+            user[4] = expiry_date.strftime("%d/%m/%Y")
+
+    if not user_found:
+        return "phone"
+
+    # saving changes
+    with open(USERS_FILE, "w", newline="") as users_f:
+        writer = csv.writer(users_f)
+        writer.writerows(users)
+
+    return "done"
+
+def return_book(isbn):
+    """
+    Uses book-status.csv to check is book is issued, if given book is issued then deletes record
+    from book-status.csv and changes "not-in-shelf" to "in-shelf". If book returned after expected
+    return date then 1 day subtracted from users membership. Writes record in log.csv
+    Returns "not-found" if if no such book issued found (or if book not issued by anyone), "done-l" if process completed successfully
+    but late return and returns "done" if book returned on time.
+    """
+    # isbn must be a string without whitespaces at the ends
+
+    # loading book statuses data, users data amd books data
+    with open(BOOK_STATUS_FILE, "r", newline="") as book_status_f:
+        book_statuses = list(csv.reader(book_status_f))
 
     with open(USERS_FILE, "r", newline="") as users_f:
         users = list(csv.reader(users_f))
 
-    with open(BOOK_STATUS_FILE, "r", newline="") as book_status_f:
-        book_statuses = list(csv.reader(book_status_f))
+    with open(BOOKS_FILE, "r", newline="") as books_f:
+        books = list(csv.reader(books_f))
 
-    return books, users, book_statuses
+    book_is_issued = False
+    for book_status_num in range(len(book_statuses)):
+        if book_statuses[book_status_num][0] == isbn: # is true if book is issued
+            book_is_issued = True
+            break
 
-def save_data(books_data, users_data, book_statuses):
-    """
-    Writes the data from the 2D lists into the books and users files
-    """
-    # Must be called at the end of the program after all the changes to the data have been made
-    # data won't be saved into the file otherwise
-    with open(BOOKS_FILE, "w", newline="") as books_f:
-        writer = csv.writer(books_f)
-        writer.writerows(books_data)
+    if not book_is_issued:
+        return "not-found"
 
-    with open(USERS_FILE, "w", newline="") as users_f:
-        writer = csv.writer(users_f)
-        writer.writerows(users_data)
+    d, m, y = book_statuses[book_status_num][3].split("/")
+    expected_return_date = date(int(y), int(m), int(d))
+    actual_return_date = date.today()
+    late = expected_return_date < actual_return_date # true if book returned late
+    actual_return_date = actual_return_date.strftime("%d/%m/%Y")
 
+    for user in users:
+        if book_statuses[book_status_num][1] == user[2]: # user found
+            if late:
+                d, m, y = user[4].split("/")
+                user[4] = (date(int(y), int(m), int(d)) - timedelta(days=1)).strftime("%d/%m/%Y")
+                # reduced one day from membership in the above line
+                # saving user changes
+                with open(USERS_FILE, "w", newline="") as users_f:
+                    writer = csv.writer(users_f)
+                    writer.writerows(users)
+            break
+
+    # changing from "not-in-shelf" to "in-shelf"
+    for book in books:
+        if book[2] == isbn:
+            book[4] = "in-shelf"
+            break
+
+    # logging
+    row = [user[0].title() + " " + user[1].title(), user[2], book[0], isbn, book_statuses[book_status_num][2], book_statuses[book_status_num][3], actual_return_date]
+    with open(LOG_FILE, "a", newline="") as log_f:
+        writer = csv.writer(log_f)
+        writer.writerow(row)
+
+    del book_statuses[book_status_num] # removed record
+
+    # saving changes
     with open(BOOK_STATUS_FILE, "w", newline="") as book_status_f:
         writer = csv.writer(book_status_f)
         writer.writerows(book_statuses)
 
-# --------------------------------------------------------------------------------------------------
+    with open(BOOKS_FILE, "w", newline="") as books_f:
+        writer = csv.writer(books_f)
+        writer.writerows(books)
 
-# USER RELATED FUNCTIONS ---------------------------------------------------------------------------
-def find_user(users_data, phone_num):
-    """
-    Returns users index in the users_data 2D list
-    If user not found, returns None
-    Usage:
-    if find_user():
-        <code block when user found>
-    else:
-        <display message that user not found>
-    """
-    for user_num in range(len(users_data)):
-        if users_data[user_num][2] == phone_num:
-            return user_num 
+    if late:
+        return "done-l"
+    return "done"
 
-def add_user(users_data, first_name, last_name, phone_num, duration=30):
+def edit_user(old_phone, first_name, last_name, new_phone):
     """
-    Saves user info in users csv file
+    Updates user data in the csv file. Keeps original user data if None passed as argument.
+    Returns "phone" if user not found and "done" if successful.
     """
-    # Called when add new user
-    # default duration for membership is 30 days
-    date = datetime.now()
-    date = f"{date.day}/{date.month}/{date.year}"
-    users_data.append([first_name, last_name, phone_num, date, duration])
+    # old_phone must be a string without whitespaces at the ends
 
-def renew_user(users_data, phone_num, duration=30):
-    """
-    Renews the membership date, searches for user using phone number
-    """
-    # Called when renew user
-    phone_num = phone_num.strip()
-    user_num = find_user(users_data, phone_num)
-    date = datetime.now()
-    date = f"{date.day}/{date.month}/{date.year}"
-    users_data[user_num][3] = date
-    users_data[user_num][4] = duration
+    # loading users data
+    with open(USERS_FILE, "r", newline="") as users_f:
+        users = list(csv.reader(users_f))
 
-def edit_user(users_data, phone_num, new_data):
-    """
-    Can be used to change the users name and phone number. If value of any key is 'None' that user
-    field isn't changed
-    new data = {"first-name": abc,"last-name": cde,"phone-num": fgh}
-    """
-    # Called when edit user
-    user_num = find_user(users_data, phone_num)
-    if new_data["first-name"] != None:
-        users_data[user_num][0] = new_data["first-name"].strip()
-    if new_data["last-name"] != None:
-        users_data[user_num][1] = new_data["last-name"].strip()
-    if new_data["phone-num"] != None:
-        users_data[user_num][2] = str(new_data["phone-num"].strip())
-
-# --------------------------------------------------------------------------------------------------
-
-# BOOK RELATED FUNCTIONS ---------------------------------------------------------------------------
-def get_shelf(books_data):
-    """
-    Returns a {"in-shelf": in_shelf,"not-in-shelf": not_in_shelf} where in_shelf/not_in_shelf is a
-    list of book names
-    Usage: if user_book in books_data["in-shelf"]:
-        <code block when book in shelf>
-    elif user_book in books_data["not-in-shelf"]:
-        <code block when book in shelf>
-    else:
-        <display message that no such book in library>
-    """
-    books = {"in-shelf": [], "not-in-shelf": []}
-    # looped from [1:] to avoid key error due to book[4] giving 'Status' (col heading)
-    for book in books_data[1:]:
-        books[book[4]].append(book[0])
-        # directly uses book status as a key to append the book[0] (book name) to the required list
-    return books
-
-def add_book(books_data, name, isbn, genre, author):
-    """
-    Adds a book into the library database when the library buys a new book
-    """
-    # Called when 'add new book'
-    books_data.append([name, genre, isbn, author, "in-shelf"])
-
-def issue_book(books_data, book_statuses, phone, isbn, duration=7):
-    """
-    Changes status of book from 'in-shelf' to 'not-in-shelf' and writes record in book-status.csv
-    logging done once book is returned
-    """
-    # Called when issue book
-    isbn = str(isbn).strip()
-    for book_num in range(len(books_data)):
-        if books_data[book_num][1].strip() == isbn:
-            date = datetime.now()
-            date = f"{date.day}/{date.month}/{date.year}"
-            books_data[book_num][4] = "not-in-shelf"
-            book_statuses.append([books_data[book_num][1], phone, duration, date])
+    user_found = False
+    for user in users:
+        if user[2] == old_phone: # user found
+            if first_name:
+                user[0] = first_name.strip().title()
+            if last_name:
+                user[1] = last_name.strip().title()
+            if new_phone:
+                user[2] = new_phone.strip()
+            user_found = True
             break
 
-def return_book(books_data, users_data, book_statuses, isbn):
+    if not user_found:
+        return "phone"
+
+    # saving changes
+    with open(USERS_FILE, "w", newline="") as users_f:
+        writer = csv.writer(users_f)
+        writer.writerows(users)
+
+    return "done"
+
+def book_status(isbn):
     """
-    Changes status of book from 'not-in-shelf' to 'in-shelf' and deletes record from book-status.csv
-    and logs the data
+    Returns "in-shelf" or "not-in-shelf" if book exists and "isbn" if book not found.
     """
-    # idea for late return: if book returned late then reduce 1 day from duration of user membership
-    isbn = isbn.strip()
-    for status_num in range(len(book_statuses)):
-        if book_statuses[status_num][0].strip() == isbn:
-            phone, duration, issue_date = book_statuses[status_num][1:]
-            del book_statuses[status_num]
-            break
+    # isbn must be string without whitespaces at the ends
 
-    issue_date_d, issue_date_m, issue_date_y = issue_date.split("/")
-    issue_date = date(int(issue_date_y), int(issue_date_m), int(issue_date_d))
-    return_date = date.today()
+    # loading books data
+    with open(BOOKS_FILE, "r", newline="") as books_f:
+        books = list(csv.reader(books_f))
 
-    days_elapsed = (return_date - issue_date).days # to be compared with duration for late return
-    issue_date = f"{issue_date.day}/{issue_date.month}/{issue_date.year}"
-    return_date = f"{return_date.day}/{return_date.month}/{return_date.year}"
+    for book in books:
+        if book[2] == isbn:
+            return book[4]
 
-    user_num = find_user(users_data, phone)
-    user_name = users_data[user_num][0] + " " + users_data[user_num][1]
-    # concatenated first name and last name
+    return "isbn"
 
-    for book_num in range(len(books_data)):
-        if books_data[book_num][1].strip() == isbn:
-            book_name = books_data[book_num][0].strip()
-            books_data[book_num][4] = "in-shelf"
-            break
+def user_status(phone):
+    """
+    Returns (registration_date, expiry_date, is_expired) if user found otherwise returns "phone".
+    """
+    # phone must be a string without whitespaces at the ends
 
-    data_row = [user_name, phone, book_name, isbn, duration, issue_date, return_date]
+    # loading users data
+    with open(USERS_FILE, "r", newline="") as users_f:
+        users = list(csv.reader(users_f))
 
-    with open(LOG_FILE, "a", newline="") as log_f:
-        writer = csv.writer(log_f)
-        writer.writerow(data_row)
+    for user in users:
+        if user[2] == phone:
+            rd, rm, ry = user[3].split("/") # registration_date d, m and y respectively
+            ed, em, ey = user[4].split("/") # expiry d, m and y respectively
+            expiry_date = date(int(ey), int(em), int(ed))
+            is_expired = expiry_date < date.today()
+            return (user[3], user[4], is_expired)
 
-    if days_elapsed > int(duration):
-        print("Late")
-    else:
-        print("On Time")
+    return "phone"
 
-# --------------------------------------------------------------------------------------------------
-
-if __name__ == "__main__":
-    reset_data_files(reset_books=False, reset_users=False, reset_books_status=True, reset_log=True)
-    # books_data, users_data, book_statuses = get_data()
-    # save_data(books_data, users_data, book_statuses)
+# reset_data_files(reset_books=False, reset_users=False, reset_books_status=False, reset_log=False)
