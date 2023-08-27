@@ -50,8 +50,8 @@ def open_renew_user_menu():
         elif formatcheck == "correctformat" and str(fduration).isnumeric()==True:
             fduration = int(fduration)
             result = DataManager.renew_user(fphone,fduration)
-            if result == "phone":
-                messagebox.showerror("Not Found","Entered phone number not found, please try again.")
+            if result == "id":
+                messagebox.showerror("Not Found","Entered user ID not found, please try again.")
                 phonenoentry.delete(0, END)
             elif result == "done":
                 messagebox.showinfo("Success","User's membership has been successfully renewed")

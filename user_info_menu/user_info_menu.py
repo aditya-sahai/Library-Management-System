@@ -43,7 +43,7 @@ def open_user_info_menu():
         result = DataManager.user_status(fphone)
         print(result)
         tempstring = "Registration Date: "+result[0]+", Expiry Date: "+result[1]+", Expired: "+result[2]
-        if result == "phone":
+        if result == "id":
             messagebox.showerror("Not Found","User not found!")
         else:
             messagebox.showinfo("User Found",tempstring)

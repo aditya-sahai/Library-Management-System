@@ -59,8 +59,8 @@ def open_edit_user_menu():
         
         elif oldphonecheck=="correctformat" and newphonecheck=="correctformat":
             result = DataManager.edit_user(oldphone,newfname,newlname,newphone)
-            if result == "phone":
-                messagebox.showerror("Not Found","Entered phone number does not exist!")
+            if result == "id":
+                messagebox.showerror("Not Found","Entered user ID not found!")
             elif result == "done":
                 messagebox.showinfo("Success","User data has been successfully edited!")
                 ogphonenoentry.delete(0, END)

@@ -51,8 +51,8 @@ def open_issue_book_menu():
         fbookisbn = str(fbookisbn).strip()
         fissuephone = str(fissuephone).strip()
         result = DataManager.issue_book(fbookisbn,fissuephone,fissueduration)
-        if result == "phone":
-            messagebox.showerror("User Not Found", "User not found! Please check phone number.")
+        if result == "id":
+            messagebox.showerror("User Not Found", "User not found! Please check user ID.")
             phone_no_entry.delete(0, END)
         elif result == "isbn": # This case will never happen here as we're already checking for it in the bigger if block
             messagebox.showerror("ISBN Not Found", "Entered ISBN not found!")
